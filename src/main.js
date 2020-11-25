@@ -19,10 +19,10 @@ import VueOtp2 from 'vue-otp-2'
 import 'vue2-timepicker/dist/VueTimepicker.css'
 import VueCookies from 'vue-cookies'
 import VueCryptojs from 'vue-cryptojs'
-import io from 'socket.io-client'
-import VueSocketio from 'vue-socket.io-extended'
+// import io from 'socket.io-client'
+// import VueSocketio from 'vue-socket.io-extended'
 
-Vue.use(VueSocketio, io('https://oneconf-dev3.cloudns.asia'))
+// Vue.use(VueSocketio, io('https://oneconf-dev3.cloudns.asia'))
 
 Vue.use(VueCryptojs)
 

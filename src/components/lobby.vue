@@ -145,6 +145,7 @@
 
 <script>
 import { mapState } from 'vuex'
+import io from 'socket.io-client'
 
 export default {
   mounted () {
@@ -167,7 +168,10 @@ export default {
       txtLink: '',
       loading: false,
       dialog: false,
-      approve: false
+      approve: false,
+      meetingId: '',
+      userIdfromURL: '',
+      socket: ''
     }
   },
   beforeRouteEnter (to, from, next) {
@@ -192,7 +196,7 @@ export default {
     },
     sockets () {
       const id = this.datapage.user._id
-      this.$socket.client.on(id, (response) => {
+      this.socket.client.on(id, (response) => {
         this.loading = false
         if (response.approve === true) {
           window.open(this.$cookies.get('meetUrl'), '_self')
@@ -229,6 +233,13 @@ export default {
         })
     },
     getMedia () {
+      this.socket = io.connect('http://localhost:9000')
+      var url = this.$cookies.get('meetUrl')
+      this.meetingId = url.split('/')[3].split('?')[0]
+      this.userIdfromURL = url.split('?')[6]
+      // console.log('url = ' + url)
+      // console.log('Id = ' + this.datapage.user._id)
+      // console.log('hostId = ' + this.hostId)
       // Prefer camera resolution nearest to 1280x720.
       var constraints = { audio: true, video: { width: 1280, height: 650 } }
       const vm = this
@@ -304,11 +315,9 @@ export default {
       this.clickvoice = !this.clickvoice
     },
     startConference () {
-      if (this.approve && !this.approveUser) {
-        var url = this.$cookies.get('meetUrl')
-        const meetingId = url.split('/')[3].split('?')[0]
-        this.$socket.client.emit('lobbyApprove', {
-          meetingId: meetingId,
+      if (this.approve && !this.approveUser && this.userIdfromURL !== this.datapage.user._id) {
+        this.socket.client.emit('lobbyApprove', {
+          meetingId: this.meetingId,
           name: this.datapage.user.username,
           id: this.datapage.user._id
         })
@@ -341,7 +350,7 @@ export default {
         const decryptedText = this.CryptoJS.AES.decrypt(this.d, 'One Conference').toString(this.CryptoJS.enc.Utf8)
         var data = this.jwt.decode(decryptedText)
         this.datapage = data
-        console.log('datapage', this.datapage)
+        // console.log('datapage', this.datapage)
       }
     },
     async joinNoLogin () {
